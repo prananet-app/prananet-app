@@ -1,4 +1,4 @@
-name: Build Android APK
+name: Build Bhu-Care APK
 
 on:
   push:
@@ -25,8 +25,47 @@ jobs:
           flutter-version: '3.19.x'
           channel: 'stable'
 
-      - name: Create Android scaffolding
-        run: flutter create . --project-name=prananet_app --platforms=android --no-overwrite
+      - name: Create Android Scaffolding with Bhu-Care Name
+        run: |
+          flutter create . --project-name=bhu_care --platforms=android --no-overwrite
+          # Android स्क्रीन पर दिखने वाला नाम Bhu-Care सेट करना
+          sed -i 's/android:label=".*"/android:label="Bhu-Care"/' android/app/src/main/AndroidManifest.xml
+
+      - name: Generate Premium Medical Icon
+        run: |
+          python3 -c "
+          from PIL import Image, ImageDraw
+          import os
+
+          # 512x512 Tactical Dark Red Icon
+          img = Image.new('RGBA', (512, 512), (13, 17, 23, 255))
+          draw = ImageDraw.Draw(img)
+
+          # Red Shield / Outer Glow
+          draw.rounded_rectangle([32, 32, 480, 480], radius=90, fill=(23, 27, 34, 255), outline=(255, 59, 48, 255), width=16)
+
+          # Emergency Cross / Heartbeat Base (Crimson Red)
+          draw.rounded_rectangle([220, 110, 292, 402], radius=16, fill=(255, 59, 48, 255))
+          draw.rounded_rectangle([110, 220, 402, 292], radius=16, fill=(255, 59, 48, 255))
+
+          # Inner White Core
+          draw.rounded_rectangle([236, 130, 276, 382], radius=10, fill=(255, 255, 255, 255))
+          draw.rounded_rectangle([130, 236, 382, 276], radius=10, fill=(255, 255, 255, 255))
+
+          sizes = [
+              ('mipmap-mdpi', 48),
+              ('mipmap-hdpi', 72),
+              ('mipmap-xhdpi', 96),
+              ('mipmap-xxhdpi', 144),
+              ('mipmap-xxxhdpi', 192)
+          ]
+          base_path = 'android/app/src/main/res'
+          for folder, s in sizes:
+              target_dir = os.path.join(base_path, folder)
+              os.makedirs(target_dir, exist_ok=True)
+              resized = img.resize((s, s), Image.Resampling.LANCZOS)
+              resized.save(os.path.join(target_dir, 'ic_launcher.png'))
+          "
 
       - name: Install dependencies
         run: flutter pub get
@@ -34,9 +73,9 @@ jobs:
       - name: Build APK
         run: flutter build apk --release
 
-      - name: Upload APK Artifact
+      - name: Upload Bhu-Care APK
         uses: actions/upload-artifact@v4
         with:
-          name: PranaNet-Emergency-App
+          name: Bhu-Care-Emergency-App
           path: build/app/outputs/flutter-apk/app-release.apk
           
