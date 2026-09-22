@@ -9,8 +9,10 @@ void main() => runApp(const MaterialApp(
   home: BhuCareApp(),
 ));
 
-const String supabaseUrl = '''https://frzvxgjkwtvltfulwlay.supabase.co/rest/v1/'''
-const String supabaseAnonKey = '''eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZyenZ4Z2prd3R2bHRmdWx3bGF5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAwMDkwMDgsImV4cCI6MjEwNTU4NTAwOH0.lxvaKIKGoHXErBxqFkXdQF3DK7O-lXkzrbbHH_Fd-VE'''
+// आपकी असली Supabase चाबियाँ बिल्कुल सही तरीके से सेट:
+const String supabaseUrl = '''https://frzvxgjkwtvltfulwlay.supabase.co''';
+
+const String supabaseAnonKey = '''eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZyenZ4Z2prd3R2bHRmdWx3bGF5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAwMDkwMDgsImV4cCI6MjEwNTU4NTAwOH0.lxvaKIKGoHXErBxqFkXdQF3DK7O-lXkzrbbHH_Fd-VE''';
 
 class BhuCareApp extends StatefulWidget {
   const BhuCareApp({super.key});
@@ -61,7 +63,7 @@ class _BhuCareAppState extends State<BhuCareApp> {
           'bp': bp,
           'status': 'IN_TRANSIT',
         }),
-      ).timeout(const Duration(seconds: 4));
+      ).timeout(const Duration(seconds: 5));
 
       if (res.statusCode == 201 || res.statusCode == 200) {
         setState(() => cloudStatus = "LIVE CLOUD SYNCED ✅");
@@ -80,7 +82,7 @@ class _BhuCareAppState extends State<BhuCareApp> {
       timerSecs = 45 * 60;
     });
 
-    // तुरंत Supabase पर डेटा भेजें
+    // तुरंत Supabase सर्वर पर बुकिंग रिकॉर्ड भेजें
     syncWithSupabase();
 
     t?.cancel();
@@ -189,7 +191,7 @@ class _BhuCareAppState extends State<BhuCareApp> {
                     });
                     Navigator.pop(ctx);
                     if (locked) {
-                      syncWithSupabase(); // नए वाइटल्स सीधे क्लाउड पर भेजें
+                      syncWithSupabase();
                     }
                   },
                   child: const Text("UPDATE & TRANSMIT TO DOCTOR", style: TextStyle(fontWeight: FontWeight.w900)),
