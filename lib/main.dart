@@ -9,8 +9,8 @@ void main() => runApp(const MaterialApp(
   home: BhuCareApp(),
 ));
 
-const String supabaseUrl = '''https://yeiceiwupehfqiwqbz.supabase.co''';
-const String supabaseAnonKey = '''eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InllaWNlaXd1cGVoZnFpd3FieiIsImF1dCI6ImFub24iLCJpYXQiOjE3OTAwMDkxMjgsImV4cCI6MjEwNTU4NTEyOH0.BUKPoz6zbz_sLl-6BKbADwY9sbHU_5_v6czX0LF07A4''';
+const String supabaseUrl = '''https://frzvxgjkwtvltfulwlay.supabase.co/rest/v1/'''
+const String supabaseAnonKey = '''eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZyenZ4Z2prd3R2bHRmdWx3bGF5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAwMDkwMDgsImV4cCI6MjEwNTU4NTAwOH0.lxvaKIKGoHXErBxqFkXdQF3DK7O-lXkzrbbHH_Fd-VE'''
 
 class BhuCareApp extends StatefulWidget {
   const BhuCareApp({super.key});
