@@ -28,12 +28,12 @@ jobs:
       - name: Create Android Scaffolding
         run: flutter create . --project-name=prananet_app --platforms=android --no-overwrite
 
-      - name: Add Internet Permission and App Name
+      - name: Add Permissions and App Name
         run: |
-          # 1. ऐप का नाम Bhu-Care सेट करना
           sed -i 's/android:label=".*"/android:label="Bhu-Care"/' android/app/src/main/AndroidManifest.xml
-          # 2. Android को इंटरनेट चलाने की कानूनी परमिशन देना
           sed -i '/<application/i \    <uses-permission android:name="android.permission.INTERNET"/>' android/app/src/main/AndroidManifest.xml
+          sed -i '/<application/i \    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>' android/app/src/main/AndroidManifest.xml
+          sed -i '/<application/i \    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>' android/app/src/main/AndroidManifest.xml
 
       - name: Install Dependencies
         run: flutter pub get
