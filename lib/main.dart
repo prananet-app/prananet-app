@@ -4,25 +4,27 @@ import 'package:url_launcher/url_launcher.dart';
 
 void main() => runApp(const MaterialApp(
   debugShowCheckedModeBanner: false,
-  home: PranaNet(),
+  home: BhuCareApp(),
 ));
 
-class PranaNet extends StatefulWidget {
-  const PranaNet({super.key});
+class BhuCareApp extends StatefulWidget {
+  const BhuCareApp({super.key});
   @override
-  State<PranaNet> createState() => _PranaNetState();
+  State<BhuCareApp> createState() => _BhuCareAppState();
 }
 
-class _PranaNetState extends State<PranaNet> {
+class _BhuCareAppState extends State<BhuCareApp> {
   int triage = 0;
   bool locked = false;
   String hosp = "";
   int timerSecs = 45 * 60;
   Timer? t;
 
-  int pulse = 88;
-  int spo2 = 98;
-  String bp = "120/80";
+  // शुरुआत में खाली रहेगा (डिफ़ॉल्ट फर्जी नंबर नहीं)
+  String pulse = "--";
+  String spo2 = "--";
+  String bp = "--/--";
+  bool vitalsEntered = false;
 
   final hospitals = [
     {"name": "Apex Trauma Center", "dist": "2.9 km", "eta": "6m", "beds": 3, "vents": 2, "doc": "Neurosurgeon On-Site"},
@@ -55,14 +57,17 @@ class _PranaNetState extends State<PranaNet> {
   }
 
   void editVitals() {
-    final pC = TextEditingController(text: pulse.toString());
-    final sC = TextEditingController(text: spo2.toString());
-    final bC = TextEditingController(text: bp);
+    final pC = TextEditingController(text: vitalsEntered ? pulse : "");
+    final sC = TextEditingController(text: vitalsEntered ? spo2 : "");
+    final bC = TextEditingController(text: vitalsEntered ? bp : "");
 
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: const Color(0xFF161B22),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
       builder: (ctx) => Padding(
         padding: EdgeInsets.only(
           left: 16,
@@ -73,58 +78,104 @@ class _PranaNetState extends State<PranaNet> {
         child: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                "TRANSMIT IN-TRANSIT VITALS",
-                style: TextStyle(color: Color(0xFF00E676), fontWeight: FontWeight.bold, fontSize: 13),
+              const Row(
+                children: [
+                  Icon(Icons.monitor_heart, color: Color(0xFF00E676), size: 20),
+                  SizedBox(width: 8),
+                  Text(
+                    "TRANSMIT IN-TRANSIT VITALS",
+                    style: TextStyle(color: Color(0xFF00E676), fontWeight: FontWeight.bold, fontSize: 13),
+                  ),
+                ],
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 14),
+
+              // Heart Rate Input (अब चमकीला सफेद दिखेगा)
               TextField(
                 controller: pC,
                 keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
+                cursorColor: const Color(0xFF00E676),
+                style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+                decoration: InputDecoration(
                   labelText: "Heart Rate / Pulse (BPM)",
-                  border: OutlineInputBorder(),
-                  isDense: true,
+                  labelStyle: const TextStyle(color: Colors.white70),
+                  hintText: "e.g. 92",
+                  hintStyle: const TextStyle(color: Colors.white30),
+                  filled: true,
+                  fillColor: const Color(0xFF0D1117),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: const BorderSide(color: Color(0xFF00E676), width: 1.5),
+                  ),
                 ),
               ),
               const SizedBox(height: 10),
+
+              // Oxygen Input
               TextField(
                 controller: sC,
                 keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  labelText: "Oxygen SpO2 (%)",
-                  border: OutlineInputBorder(),
-                  isDense: true,
+                cursorColor: const Color(0xFF00E676),
+                style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+                decoration: InputDecoration(
+                  labelText: "Oxygen Saturation SpO2 (%)",
+                  labelStyle: const TextStyle(color: Colors.white70),
+                  hintText: "e.g. 98",
+                  hintStyle: const TextStyle(color: Colors.white30),
+                  filled: true,
+                  fillColor: const Color(0xFF0D1117),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: const BorderSide(color: Color(0xFF00E676), width: 1.5),
+                  ),
                 ),
               ),
               const SizedBox(height: 10),
+
+              // Blood Pressure Input
               TextField(
                 controller: bC,
-                decoration: const InputDecoration(
-                  labelText: "Blood Pressure (e.g. 110/70)",
-                  border: OutlineInputBorder(),
-                  isDense: true,
+                cursorColor: const Color(0xFF00E676),
+                style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+                decoration: InputDecoration(
+                  labelText: "Blood Pressure (e.g. 120/80)",
+                  labelStyle: const TextStyle(color: Colors.white70),
+                  hintText: "e.g. 110/70",
+                  hintStyle: const TextStyle(color: Colors.white30),
+                  filled: true,
+                  fillColor: const Color(0xFF0D1117),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: const BorderSide(color: Color(0xFF00E676), width: 1.5),
+                  ),
                 ),
               ),
               const SizedBox(height: 14),
+
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF00E676),
                     foregroundColor: Colors.black,
-                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    padding: const EdgeInsets.symmetric(vertical: 13),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                   ),
                   onPressed: () {
                     setState(() {
-                      pulse = int.tryParse(pC.text) ?? pulse;
-                      spo2 = int.tryParse(sC.text) ?? spo2;
-                      bp = bC.text.isNotEmpty ? bC.text : bp;
+                      pulse = pC.text.isNotEmpty ? pC.text : "--";
+                      spo2 = sC.text.isNotEmpty ? sC.text : "--";
+                      bp = bC.text.isNotEmpty ? bC.text : "--/--";
+                      vitalsEntered = true;
                     });
                     Navigator.pop(ctx);
                   },
-                  child: const Text("UPDATE & SEND TO DOCTOR", style: TextStyle(fontWeight: FontWeight.bold)),
+                  child: const Text("UPDATE & TRANSMIT TO DOCTOR", style: TextStyle(fontWeight: FontWeight.w900)),
                 ),
               )
             ],
@@ -148,11 +199,19 @@ class _PranaNetState extends State<PranaNet> {
       backgroundColor: const Color(0xFF0D1117),
       appBar: AppBar(
         backgroundColor: const Color(0xFF161B22),
-        title: const Text("PRANANET EMERGENCY", style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+        elevation: 0,
+        title: const Row(
+          children: [
+            Icon(Icons.shield_rounded, color: Color(0xFFFF3B30), size: 20),
+            SizedBox(width: 8),
+            Text("BHU-CARE EMERGENCY", style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w900, letterSpacing: 1)),
+          ],
+        ),
       ),
       body: ListView(
         padding: const EdgeInsets.all(12),
         children: [
+          // Active Lock Card
           if (locked)
             Card(
               color: const Color(0xFF0E2A1A),
@@ -164,7 +223,9 @@ class _PranaNetState extends State<PranaNet> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(hosp, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Colors.white)),
+                        Expanded(
+                          child: Text(hosp, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Colors.white), overflow: TextOverflow.ellipsis),
+                        ),
                         Text(fmt(timerSecs), style: const TextStyle(color: Color(0xFF00E676), fontSize: 20, fontWeight: FontWeight.bold)),
                       ],
                     ),
@@ -172,8 +233,21 @@ class _PranaNetState extends State<PranaNet> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text("PULSE: $pulse | SpO2: $spo2% | BP: $bp", style: const TextStyle(fontSize: 11, color: Colors.white70)),
-                        InkWell(onTap: editVitals, child: const Text("EDIT >", style: TextStyle(color: Color(0xFF00D2FF), fontWeight: FontWeight.bold, fontSize: 11))),
+                        Text(
+                          vitalsEntered ? "PULSE: $pulse | SpO2: $spo2% | BP: $bp" : "VITALS: NOT RECORDED",
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                            color: vitalsEntered ? Colors.white70 : Colors.amberAccent,
+                          ),
+                        ),
+                        InkWell(
+                          onTap: editVitals,
+                          child: Text(
+                            vitalsEntered ? "EDIT >" : "TAP TO LOG >",
+                            style: const TextStyle(color: Color(0xFF00D2FF), fontWeight: FontWeight.bold, fontSize: 11),
+                          ),
+                        ),
                       ],
                     ),
                     const SizedBox(height: 10),
@@ -183,7 +257,7 @@ class _PranaNetState extends State<PranaNet> {
                         style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF00E676), foregroundColor: Colors.black),
                         onPressed: () => openMaps(hosp),
                         icon: const Icon(Icons.navigation, size: 16),
-                        label: const Text("OPEN IN GOOGLE MAPS"),
+                        label: const Text("OPEN IN GOOGLE MAPS", style: TextStyle(fontWeight: FontWeight.w900)),
                       ),
                     )
                   ],
@@ -191,6 +265,8 @@ class _PranaNetState extends State<PranaNet> {
               ),
             ),
           const SizedBox(height: 8),
+
+          // Triage
           const Text("SELECT EMERGENCY TYPE", style: TextStyle(color: Colors.white54, fontSize: 10, fontWeight: FontWeight.bold)),
           const SizedBox(height: 6),
           Row(
@@ -203,6 +279,8 @@ class _PranaNetState extends State<PranaNet> {
             ],
           ),
           const SizedBox(height: 14),
+
+          // Hospital List
           const Text("AVAILABLE ICU BEDS (LIVE)", style: TextStyle(color: Colors.white54, fontSize: 10, fontWeight: FontWeight.bold)),
           const SizedBox(height: 6),
           ...hospitals.map((h) => Card(
@@ -232,7 +310,7 @@ class _PranaNetState extends State<PranaNet> {
                         disabledBackgroundColor: Colors.white12,
                       ),
                       onPressed: locked ? null : () => lock(h["name"].toString()),
-                      child: const Text("LOCK ICU BED (45 MINS)"),
+                      child: const Text("LOCK ICU BED (45 MINS)", style: TextStyle(fontWeight: FontWeight.bold)),
                     ),
                   ),
                 ],
