@@ -28,10 +28,29 @@ jobs:
       - name: Create Android Scaffolding
         run: flutter create . --project-name=prananet_app --platforms=android --no-overwrite
 
-      - name: Add Internet Permission and App Name
+      - name: Configure Android Permissions and SDK 34
         run: |
+          # 1. App name
           sed -i 's/android:label=".*"/android:label="Bhu-Care"/' android/app/src/main/AndroidManifest.xml
+          
+          # 2. Permissions
           sed -i '/<application/i \    <uses-permission android:name="android.permission.INTERNET"/>' android/app/src/main/AndroidManifest.xml
+          sed -i '/<application/i \    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>' android/app/src/main/AndroidManifest.xml
+          sed -i '/<application/i \    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>' android/app/src/main/AndroidManifest.xml
+
+          # 3. Subprojects compileSdkVersion 34 Fix
+          cat << 'EOF' >> android/build.gradle
+
+          subprojects {
+              afterEvaluate { project ->
+                  if (project.hasProperty('android')) {
+                      project.android {
+                          compileSdkVersion 34
+                      }
+                  }
+              }
+          }
+          EOF
 
       - name: Install Dependencies
         run: flutter pub get
